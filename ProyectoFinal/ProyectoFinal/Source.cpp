@@ -9,14 +9,13 @@ static void visorUsuario();
 static void visorAutomatico();
 static void visorInstrucciones();
 
-static void pinta(void) {
+static void pinta(void);
 
 const int PALETA = 3;
 
 void init(void) {
-  width = 500;
-  height = 500;
-	glClearColor(1.0, 1.0, 1.0, 0.0);
+    width = 500;
+    height = 500;
 }
 
 void dibujaCubo(float largo, float x, float y, float z) {
@@ -79,24 +78,25 @@ void pinta(void) {
 
 static void visorInstrucciones()
 {
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glColor3f(0, 1, 0.0f);
-	gluLookAt(0.0, 0.0, 0, 0, 0, -1.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 0.0, 0, 0, 0, -10.0, 0.0, 1.0, 0.0);
 
 	glBegin(GL_QUADS);
-	glVertex3d(-1, -1, 0);
-	glVertex3d(-1, 1, 0);
-	glVertex3d(1, 1, 0);
-	glVertex3d(1, -1, 0);
+	glVertex3d(-70, -70, -1);
+	glVertex3d(-70, 70, -1);
+	glVertex3d(70, 70, -1);
+	glVertex3d(70, -70, -1);
 	glEnd();
 }
 
 static void visorUsuario()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-  gluLookAt(0.0, 0.0, 0, 0, 0, -1.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 0.0, 0, 0, 0, 10.0, 0.0, 1.0, 0.0);
 
 	int largo = 10, pisos = 20, h = 0;
 	for (int i = 0; i < pisos; i++) {
@@ -135,10 +135,10 @@ static void visorUsuario()
 
 static void visorAutomatico()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-  gluLookAt(0.0, 0.0, 0, 0, 0, -1.0, 0.0, 1.0, 0.0);
+    gluLookAt(5, 5, -10, 0, 0, 0, 0.0, 1.0, 0.0);
 
 	int largo = 10, pisos = 20, h = 0;
 	for (int i = 0; i < pisos; i++) {
@@ -180,7 +180,7 @@ static void reshape(int w, int h) {
 	height = h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-2.0, 2.0, -2.0, 2.0, 0, 5.0);
+	glFrustum(-70.0, 70.0, -70.0, 70.0, 1, 50.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(width, height);
+	glutInitWindowSize(500, 500);
 	glutCreateWindow("Proyecto Final");
 	init();
 	glClearColor(0.0, 0.0, 0.0, 0.0);
