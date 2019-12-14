@@ -1,13 +1,19 @@
 #include <stdlib.h>
-#include "GL/glut.h"
+#include <GL/glut.h>
 #include <math.h>
-#include <stdarg.h>
 
 const int PALETA = 3;
-const int WINWIDTH = 500, WINHEIGHT = 500; // Initial display-window size.
+int WINWIDTH = 1000, WINHEIGHT = 500; // Initial display-window size.
+const float LENGTH = 34;
+const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7;
 
 void init(void) {
 	glClearColor(1.0, 1.0, 1.0, 0.0);
+
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
+	glMatrixMode(GL_MODELVIEW);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void dibujaCubo(float largo, float x, float y, float z) {
@@ -53,26 +59,36 @@ void dibujaPiso(float largo, int n, float colores[][PALETA], int rows) {
 
 void pinta(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	glColor3f(0.0, 0.0, 1.0);
 
-	int largo = 10, pisos = 20, h = 0;
+	gluLookAt(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	// gluLookAt(-1, 1, 1, 0, 0, 0, 0, 1.0, 0.0);
+
+	int largo = 15, pisos = 15, h = 0;
+	float cte = largo / pisos;
+	int n = pisos * 2;
 	for (int i = 0; i < pisos; i++) {
 		float colores[][PALETA] = {
-			{0, 1, 0},
-			{1, 0, 1}
+			{1, 1, 0.2},
+			{1, 0.7, 0.1},
+			{1, 0.4, 0.3},
+			{1, 0.1, 0.1},
+			{0.9, 0.5, 0.2},
+			{0.8, 0.9, 0.4},
+			{0.7, 0.7, 0.4},
+			{0.7, 0, 0.1},
+			{0.3, 0.1, 0.7},
 		};
 		int rows = sizeof colores / sizeof colores[0];
 		glPushMatrix();
 		glTranslatef(0.0, 0.0, h);
-		dibujaPiso(largo, 5, colores, rows);
+		dibujaPiso(largo, n, colores, rows);
 		glPopMatrix();
-		h += largo;
-		largo--;
-		pisos -= 2;
+		h = largo;
+		largo -= cte;
+		n -= 2;
 	}
-
+	/*
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 
@@ -89,17 +105,17 @@ void pinta(void) {
 	dibujaPiramide(10, 20, 45, 45, 0);
 
 	glPopMatrix();
-
+	*/
 	glFlush();
 }
 
-void winReshapeFcn(GLint newWidth, GLint newHeight)
+void reshapeFcn(GLint newWidth, GLint newHeight)
 {
 	glViewport(0, 0, newWidth, newHeight);
-	glMatrixMode(GL_PROJECTION);
-	glOrtho(-2.0, 2.0, -2.0, 2.0, 0.0, 5.0);
-	glMatrixMode(GL_MODELVIEW);
-	glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+	glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
+    glMatrixMode(GL_MODELVIEW);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 int main(int argc, char** argv) {
@@ -110,6 +126,7 @@ int main(int argc, char** argv) {
 	glutCreateWindow("Proyecto Final");
 	init();
 	glutDisplayFunc(pinta);
-	glutReshapeFunc(winReshapeFcn);
+	glutReshapeFunc(reshapeFcn);
 	glutMainLoop();
+	return 1;
 }
