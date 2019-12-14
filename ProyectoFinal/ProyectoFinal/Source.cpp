@@ -96,7 +96,7 @@ static void visorUsuario()
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 0, 0, 0, 10.0, 0.0, 1.0, 0.0);
+	gluLookAt(1, 1, 0, 0, 0, 0, 0.0, 1.0, 0.0);
 
 	int largo = 10, pisos = 20, h = 0;
 	for (int i = 0; i < pisos; i++) {
@@ -138,7 +138,8 @@ static void visorAutomatico()
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-    gluLookAt(5, 5, -10, 0, 0, 0, 0.0, 1.0, 0.0);
+    //gluLookAt(1, 1, 0, 0, 0, 0, 0.0, 1.0, 0.0);
+	//gluLookAt(1, 0, 0, 0, 0, 0, 0, 1, 0);
 
 	int largo = 10, pisos = 20, h = 0;
 	for (int i = 0; i < pisos; i++) {
@@ -191,7 +192,7 @@ int main(int argc, char** argv) {
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Proyecto Final");
 	init();
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(1, 1, 1, 1);
 	glShadeModel(GL_FLAT);
 	glutDisplayFunc(pinta);
 	glutReshapeFunc(reshape);
