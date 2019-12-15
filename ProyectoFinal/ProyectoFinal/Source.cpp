@@ -4,43 +4,180 @@
 
 const int PALETA = 3;
 int WINWIDTH = 1000, WINHEIGHT = 500; // Initial display-window size.
-const float LENGTH = 34;
+const float LENGTH = 500;
 const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7;
+// TIPO DE MATERIALES
+const float NO_MAT[] = { 0, 0, 0, 1 };
+const float MAT_AMBIENT[] = { 0.7, 0.7, 0.7, 1/2 };
+// const float MAT_AMBIENT_COLOR[] = { 0.8, 0.8, 0.2, 1 };
+const float MAT_AMBIENT_COLOR[] = { 1, 1, 1, 1/2 };
+// const float MAT_DIFFUSE[] = { 0.1, 0.5, 0.8, 1 };
+const float MAT_DIFFUSE[] = { 1, 1, 1, 1 };
+const float MAT_SPECULAR[] = { 1, 1, 1, 1 };
+const float NO_SHININESS = 0;
+const float LOW_SHININESS = 5;
+const float HIGH_SHININESS = 100;
+const float MAT_EMISSION[] = { 0.3, 0.2, 0.2, 0 };
+// PROPIEDADES DE LUCES
+const float AMBIENT[] = { 0, 0, 0, 1 };
+const float DIFFUSE[] = { 1, 1, 1, 1 };
+const float SPECULAR[] = { 1, 1, 1, 1 };
+const float POSITION[] = { 1, 1, 0.3, 0 };
+// INIT LUCES
+float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
+int model_two_side = 1;
+int viewpoint = 0;
 
 void init(void) {
-	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClearColor(1, 1, 1, 0);
 
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
 	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, AMBIENT);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, DIFFUSE);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, SPECULAR);
+	glLightfv(GL_LIGHT0, GL_POSITION, POSITION);
+}
+
+void ponReflex(int type)
+{
+	/*
+		1 - Difusa
+		2 - Difusa y ESPECULAR, Bajo Brillo
+		3 - Difusa y ESPECULAR, Alto Brillo
+		4 - Difusa y Emisión
+		5 - AMBIENTe y Disufa
+		6 - AMBIENTe, Difusa y ESPECULAR, Bajo Brillo
+		7 - AMBIENTe, Difusa y ESPECULAR, Alto Brillo
+		8 - AMBIENTe, Difusa y Emisión
+		9 - Color AMBIENTe y Difusa
+		10 - Color AMBIENTe, Difusa y ESPECULAR, Bajo Brillo
+		11 - Color AMBIENTe, Difusa y ESPECULAR, Alto Brillo
+		12 - Color AMBIENTe, Difusa y Emisión
+	*/
+	switch (type)
+	{
+	case 1:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, NO_MAT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 2:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, NO_MAT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, LOW_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 3:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, NO_MAT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, HIGH_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 4:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, NO_MAT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, MAT_EMISSION);
+		break;
+	case 5:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 6:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, LOW_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 7:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, HIGH_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 8:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, MAT_EMISSION);
+		break;
+	case 9:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT_COLOR);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 10:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT_COLOR);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, LOW_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 11:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT_COLOR);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, MAT_SPECULAR);
+		glMaterialf(GL_FRONT, GL_SHININESS, HIGH_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, NO_MAT);
+		break;
+	case 12:
+		glMaterialfv(GL_FRONT, GL_AMBIENT, MAT_AMBIENT_COLOR);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, MAT_DIFFUSE);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, NO_MAT);
+		glMaterialf(GL_FRONT, GL_SHININESS, NO_SHININESS);
+		glMaterialfv(GL_FRONT, GL_EMISSION, MAT_EMISSION);
+		break;
+	default:
+		break;
+	}
 }
 
 void dibujaCubo(float largo, float x, float y, float z) {
 	glPushMatrix();
-	glTranslatef(x, y, z);
-	glutSolidCube(largo);
+		glTranslatef(x, y, z);
+		glutSolidCube(largo);
 	glPopMatrix();
 }
 
 void dibujaEsfera(float radio, float x, float y, float z) {
 	int nLong = 10, nLat = 12;
 	glPushMatrix();
-	glTranslatef(x, y, z);
-	glutSolidSphere(radio, nLong, nLat);
+		glTranslatef(x, y, z);
+		ponReflex(6);
+		glutSolidSphere(radio, nLong, nLat);
 	glPopMatrix();
 }
 
 void dibujaPiramide(float radioBase, float altura, float x, float y, float z) {
 	int nLong = 8, nLat = 6;
 	glPushMatrix();
-	glTranslatef(x, y, z);
-	glutSolidCone(radioBase, altura, nLong, nLat);
+		glTranslatef(x, y, z);
+		ponReflex(7);
+		glutSolidCone(radioBase, altura, nLong, nLat);
 	glPopMatrix();
 }
 
 void dibujaPiso(float largo, int n, float colores[][PALETA], int rows) {
 	int lados = 4, a, b;
+	int randMaterial = floor(rand() % 12) + 1;
+	ponReflex(randMaterial);
 	for (int i = 0; i < lados; i++)
 	{
 		a = i == 1 ? n - 1 : 0;
@@ -61,8 +198,35 @@ void pinta(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(0.0, 0.0, 1.0);
 
-	gluLookAt(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	int same = 400;
+	gluLookAt(same, same, same, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	// gluLookAt(0, 0, same, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	// gluLookAt(-1, 1, 1, 0, 0, 0, 0, 1.0, 0.0);
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_AMBIENT);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, viewpoint);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+		glColor3f(1, 1, 0);
+		dibujaEsfera(30, -5, -5, 0);
+
+		glColor3f(1, 0, 1);
+		dibujaEsfera(30, 450, -5, 0);
+
+		glColor3f(0, 0, 0);
+		dibujaPiramide(40, 60, -5, 450, 0);
+
+		glColor3f(0, 1, 1);
+		dibujaPiramide(40, 60, 450, 450, 0);
+	glPopMatrix();
 
 	int largo = 15, pisos = 15, h = 0;
 	float cte = largo / pisos;
@@ -88,24 +252,7 @@ void pinta(void) {
 		largo -= cte;
 		n -= 2;
 	}
-	/*
-	glPushMatrix();
-	glTranslatef(0, 0, 0);
 
-	glColor3f(1.0, 1.0, 0.0);
-	dibujaEsfera(10, -5, -5, 0);
-
-	glColor3f(1.0, 1.0, 0.0);
-	dibujaEsfera(10, 45, -5, 0);
-
-	glColor3f(0.0, 0.0, 0.0);
-	dibujaPiramide(10, 20, -5, 45, 0);
-
-	glColor3f(0.0, 0.0, 0.0);
-	dibujaPiramide(10, 20, 45, 45, 0);
-
-	glPopMatrix();
-	*/
 	glFlush();
 }
 
@@ -113,7 +260,8 @@ void reshapeFcn(GLint newWidth, GLint newHeight)
 {
 	glViewport(0, 0, newWidth, newHeight);
     glMatrixMode(GL_PROJECTION);
-	glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
+	// glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
+	glFrustum(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
     glMatrixMode(GL_MODELVIEW);
     glClear(GL_COLOR_BUFFER_BIT);
 }
