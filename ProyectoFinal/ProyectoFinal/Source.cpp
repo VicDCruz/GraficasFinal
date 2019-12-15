@@ -4,8 +4,9 @@
 
 const int PALETA = 3;
 int WINWIDTH = 1000, WINHEIGHT = 500; // Initial display-window size.
-const float LENGTH = 500;
+const float LENGTH = 1000;
 const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7;
+
 // TIPO DE MATERIALES
 const float NO_MAT[] = { 0, 0, 0, 1 };
 const float MAT_AMBIENT[] = { 0.7, 0.7, 0.7, 1/2 };
@@ -18,11 +19,14 @@ const float NO_SHININESS = 0;
 const float LOW_SHININESS = 5;
 const float HIGH_SHININESS = 100;
 const float MAT_EMISSION[] = { 0.3, 0.2, 0.2, 0 };
+
 // PROPIEDADES DE LUCES
 const float AMBIENT[] = { 0, 0, 0, 1 };
 const float DIFFUSE[] = { 1, 1, 1, 1 };
 const float SPECULAR[] = { 1, 1, 1, 1 };
-const float POSITION[] = { 1, 1, 0.3, 0 };
+// const float POSITION[] = { 1, 1, 0.3, 0 };
+const float POSITION[] = { 500, 500, 500, 0 };
+
 // INIT LUCES
 float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
 int model_two_side = 1;
@@ -46,17 +50,17 @@ void ponReflex(int type)
 {
 	/*
 		1 - Difusa
-		2 - Difusa y ESPECULAR, Bajo Brillo
-		3 - Difusa y ESPECULAR, Alto Brillo
+		2 - Difusa y Especular, Bajo Brillo
+		3 - Difusa y Especular, Alto Brillo
 		4 - Difusa y Emisión
-		5 - AMBIENTe y Disufa
-		6 - AMBIENTe, Difusa y ESPECULAR, Bajo Brillo
-		7 - AMBIENTe, Difusa y ESPECULAR, Alto Brillo
-		8 - AMBIENTe, Difusa y Emisión
-		9 - Color AMBIENTe y Difusa
-		10 - Color AMBIENTe, Difusa y ESPECULAR, Bajo Brillo
-		11 - Color AMBIENTe, Difusa y ESPECULAR, Alto Brillo
-		12 - Color AMBIENTe, Difusa y Emisión
+		5 - Ambiente y Disufa
+		6 - Ambiente, Difusa y Especular, Bajo Brillo
+		7 - Ambiente, Difusa y Especular, Alto Brillo
+		8 - Ambiente, Difusa y Emisión
+		9 - Color Ambiente y Difusa
+		10 - Color Ambiente, Difusa y Especular, Bajo Brillo
+		11 - Color Ambiente, Difusa y Especular, Alto Brillo
+		12 - Color Ambiente, Difusa y Emisión
 	*/
 	switch (type)
 	{
@@ -156,6 +160,74 @@ void dibujaCubo(float largo, float x, float y, float z) {
 	glPopMatrix();
 }
 
+void dibujaParedes(float alpha)
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	ponReflex(5);
+	// dibujaCubo(1000, 250, 250, -100);
+	// glPolygonMode (GL_FRONT_AND_BACK, GL_LINE); // Wire-frame back face.
+	// glColor4f(0.9, 0.5, 0.9, 1);
+
+	int lado = 750;
+	//Bottom Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(0.2, 0.2, 0.8, alpha);
+		glVertex3f(-lado, 0, -lado);
+		glVertex3f(lado, 0, -lado);
+		glVertex3f(lado, 0, lado);
+		glVertex3f(-lado, 0, lado);
+	glEnd();
+
+	//Front Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(0.0, 1.0, 0.0, alpha);
+		glVertex3f(-lado, 0, -lado);
+		glVertex3f(-lado, lado, -lado);
+		glVertex3f(lado, lado, -lado);
+		glVertex3f(lado, 0, -lado);
+	glEnd();
+
+	//Back Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(1.0, 0.0, 0.0, alpha);
+		glVertex3f(lado, 0, -lado);
+		glVertex3f(lado, lado, -lado);
+		glVertex3f(lado, lado, lado);
+		glVertex3f(lado, 0, lado);
+	glEnd();
+
+	//Right Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(1.0, 0.0, 1.0, alpha);
+		glVertex3f(lado, 0, lado);
+		glVertex3f(lado, lado, lado);
+		glVertex3f(-lado, lado, lado);
+		glVertex3f(-lado, 0, lado);
+	glEnd();
+
+	//Left Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(0.7, 0.7, 0.0, alpha);
+		glVertex3f(-lado, 0, lado);
+		glVertex3f(-lado, lado, lado);
+		glVertex3f(-lado, lado, -lado);
+		glVertex3f(-lado, 0, -lado);
+	glEnd();
+
+	//Upper Face of the cube - vertex definition
+	glBegin(GL_POLYGON);
+		glColor4f(0.7, 0.7, 0.3, alpha);
+		glVertex3f(-lado, lado, -lado);
+		glVertex3f(lado, lado, -lado);
+		glVertex3f(lado, lado, lado);
+		glVertex3f(-lado, lado, lado);
+	glEnd();
+
+	glDisable(GL_BLEND);
+}
+
 void dibujaEsfera(float radio, float x, float y, float z) {
 	int nLong = 10, nLat = 12;
 	glPushMatrix();
@@ -213,6 +285,8 @@ void pinta(void) {
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 		glColor3f(1, 1, 0);
@@ -252,6 +326,9 @@ void pinta(void) {
 		largo -= cte;
 		n -= 2;
 	}
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+	dibujaParedes(0.5);
 
 	glFlush();
 }
