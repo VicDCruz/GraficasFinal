@@ -25,7 +25,7 @@ const float AMBIENT[] = { 0, 0, 0, 1 };
 const float DIFFUSE[] = { 1, 1, 1, 1 };
 const float SPECULAR[] = { 1, 1, 1, 1 };
 // const float POSITION[] = { 1, 1, 0.3, 0 };
-const float POSITION[] = { 500, 500, 500, 0 };
+const float POSITION[] = { 500, 500, -500, 0 };
 
 // INIT LUCES
 float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
@@ -327,7 +327,7 @@ void pinta(void) {
 		n -= 2;
 	}
 
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	dibujaParedes(0.5);
 
 	glFlush();
