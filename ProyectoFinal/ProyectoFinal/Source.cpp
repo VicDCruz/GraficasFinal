@@ -506,6 +506,7 @@ static void keyPressed(unsigned char key, int x, int y)
 			teclas[i] = 0;
 		tecla = 0;
 		moviendoCam = true;
+		printf_s("Moviendo camara.\n");
 	}
 	if (key == 'F') //Ponemos un tercer foco
 	{
@@ -513,11 +514,13 @@ static void keyPressed(unsigned char key, int x, int y)
 			teclas[i] = 0;
 		tecla = 0;
 		poniendoFoc = true;
+		printf_s("Poniendo foco.\n");
 	}
 	if (moviendoCam && key == 13) // Moviendo la cámara
 	{
 		const char* dato = (char*)teclas;
 		auxCamUser[paramCam] = atof(dato);
+		printf_s("Dato leido: %f\n", atof(dato));
 		paramCam++;
 		if (paramCam == 6)
 		{
@@ -534,6 +537,7 @@ static void keyPressed(unsigned char key, int x, int y)
 	if (poniendoFoc && key == 13) // Poniendo un tercer foco
 	{
 		const char* dato = (char*)teclas;
+		printf_s("Dato leido: %f\n", atof(dato));
 		if (paramFoc < 3)
 		{
 			userColor[paramFoc] = atof(dato);
