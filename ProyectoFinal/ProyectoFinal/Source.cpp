@@ -5,6 +5,14 @@
 
 const int PALETA = 3;
 int WINWIDTH = 1000, WINHEIGHT = 500; // Initial display-window size.
+int tecla;
+unsigned char teclas[256];
+double camUser[6];
+double auxCamUser[6];
+int paramCam;
+int paramFoc;
+bool poniendoFoc;
+bool moviendoCam;
 const float LENGTH = 600;
 const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7;
 double x;
@@ -28,15 +36,15 @@ const float SPECULAR[] = { 1, 1, 1, 1 };
 // const float POSITION[] = { 1, 1, 0.3, 0 };
 const float POSITION[] = { 500, 500, 500, 0 };
 const float POSITION1[] = { -500, 500, 500, 0 };
+float userColor[4];
+float userPos[4];
 
-// INIT LUCES
 float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
 int model_two_side = 1;
 int viewpoint = 0;
 
 void init(void) {
-	//glClearColor(0,0,0, 0);
-	glClearColor(1, 1, 1, 0);
+	glClearColor(0, 0.1, 0, 0);
 
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(XWMIN, XWMAX, YWMIN, YWMAX, PNEAR, PFAR);
@@ -48,11 +56,35 @@ void init(void) {
 	glLightfv(GL_LIGHT0, GL_SPECULAR, SPECULAR);
 	glLightfv(GL_LIGHT0, GL_POSITION, POSITION);
 
+
 	glLightfv(GL_LIGHT1, GL_AMBIENT, AMBIENT);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, DIFFUSE);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, SPECULAR);
 	glLightfv(GL_LIGHT1, GL_POSITION, POSITION1);
+
 	x = 0;
+	tecla = 0;
+	paramCam = 0;
+	paramFoc = 0;
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_AMBIENT);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, viewpoint);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+
+	camUser[0] = -300;
+	camUser[1] = 0;
+	camUser[2] = 300;
+	camUser[3] = 0;
+	camUser[4] = 0;
+	camUser[5] = 0;
+
+	moviendoCam = false;
+	poniendoFoc = false;
 }
 
 void ponReflex(int type)
@@ -275,30 +307,12 @@ void dibujaPiso(float largo, int n, float colores[][PALETA], int rows) {
 	}
 	disqueRandom++;
 }
-
-void visorUsuario()
+void dibujaObra()
 {
-	glColor3f(0.0, 0.0, 1.0);
-
-	int same = 300;
-	gluLookAt(same*cos(x), same * sin(x), same, 0.0, 0.0, 0.0, 0.0, 1.0, 0);
-
-	x += 0.0005;
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_AMBIENT);
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, viewpoint);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
-
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHTING);
-
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glPushMatrix();
-	glTranslatef(0, 0, 0);
 	glColor3f(1, 1, 0);
 	dibujaEsfera(30, -5, -5, 0);
 
@@ -345,6 +359,90 @@ void visorUsuario()
 	//dibujaParedes(0.5);
 }
 
+void drawBitmapText(char* string, float x, float y, float z)
+{
+	char* c;
+	glRasterPos3f(x, y, z);
+
+	for (c = string; *c != 0; c++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
+	}
+}
+
+void visorInstrucciones()
+{
+	glDisable(GL_LIGHTING);
+	glColor3f(1, 1, 1);
+	const char* linea1 = "Bienvenido al Proyecto Final de Graficas por Computadora";
+	const char* linea2 = "Instrucciones de interaccion de usuario";
+	const char* linea3 = "Entre corchetes se encuentran los posibles valores";
+	const char* linea22 = "En los pasos 2-7 despues del valor presione enter";
+
+
+	const char* linea4 = "Para mover la camara es necesario lo siguiente:";
+	const char* linea5 = "1. Presionar 'C'";
+	const char* linea6 = "2. Escribir el primer parametro (xEye) [-500,500]";
+	const char* linea7 = "3. Escribir el segundo parametro (yEye) [-500,500]";
+	const char* linea8 = "4. Escribir el tercer parametro (zEye) [-500,500]";
+	const char* linea9 = "5. Escribir el cuarto parametro (xRef) [-500,500]";
+	const char* linea10 = "6. Escribir el quinto parametro (yRef) [-500,500]";
+	const char* linea11 = "7. Escribir el sexto parametro (zRef) [-500,500]";
+
+	const char* linea12 = "Si se equivoca pulse 'R' y comience de nuevo.";
+
+	const char* linea13 = "Para poner un foco o cambiar su posicion y color:";
+	const char* linea14 = "1. Presionar 'F'";
+	const char* linea15 = "2. Escribir el primer parametro del color (R) [0,1]";
+	const char* linea16 = "3. Escribir el segundo parametro del color (G) [0,1]";
+	const char* linea17 = "4. Escribir el tercer parametro del color (B) [0,1]";
+	const char* linea18 = "5. Escribir la primera coordenada del foco (x) [-500,500]";
+	const char* linea19 = "6. Escribir la segunda coordenada del foco (y) [-500,500]";
+	const char* linea20 = "7. Escribir la tercera coordenada del foco (z) [-500,500]";
+
+	const char* linea21 = "Si se equivoca pulse 'R' y comience de nuevo.";
+
+	drawBitmapText((char*)linea1, -300, 500, -1);
+	drawBitmapText((char*)linea2, -300, 480, -1);
+	drawBitmapText((char*)linea3, -300, 460, -1);
+	drawBitmapText((char*)linea22, -300, 440, -1);
+	drawBitmapText((char*)linea4, -300, 400, -1);
+	drawBitmapText((char*)linea5, -300, 380, -1);
+	drawBitmapText((char*)linea6, -300, 360, -1);
+	drawBitmapText((char*)linea7, -300, 340, -1);
+	drawBitmapText((char*)linea8, -300, 320, -1);
+	drawBitmapText((char*)linea9, -300, 300, -1);
+	drawBitmapText((char*)linea10, -300, 280, -1);
+	drawBitmapText((char*)linea11, -300, 260, -1);
+	drawBitmapText((char*)linea12, -300, 220, -1);
+	drawBitmapText((char*)linea13, -300, 180, -1);
+	drawBitmapText((char*)linea14, -300, 160, -1);
+	drawBitmapText((char*)linea15, -300, 140, -1);
+	drawBitmapText((char*)linea16, -300, 120, -1);
+	drawBitmapText((char*)linea17, -300, 100, -1);
+	drawBitmapText((char*)linea18, -300, 80, -1);
+	drawBitmapText((char*)linea19, -300, 60, -1);
+	drawBitmapText((char*)linea20, -300, 40, -1);
+	drawBitmapText((char*)linea21, -300, 0, -1);
+
+	gluLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
+	glEnable(GL_LIGHTING);
+}
+
+void visorAutomatico()
+{
+	int same = 300;
+	gluLookAt(same*cos(x), same * sin(x), same, 0.0, 0.0, 0.0, 0.0, 1.0, 0);
+	x += 0.0005;
+	dibujaObra();
+}
+
+void visorUsuario()
+{
+	gluLookAt(camUser[0], camUser[1], camUser[2], camUser[3], camUser[4], camUser[5], 0, 1, 0);
+	dibujaObra();
+}
+
 void pinta(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -354,14 +452,90 @@ void pinta(void) {
 
 	glViewport(0, WINHEIGHT / 2, (2 * WINWIDTH) / 3, WINHEIGHT / 2);
 	glLoadIdentity();
-	visorUsuario();
+	visorAutomatico();
 
 	glViewport((2 * WINWIDTH) / 3, 0, WINWIDTH / 3, WINHEIGHT);
 	glLoadIdentity();
-	visorUsuario();
-
+	visorInstrucciones();
 
 	glutSwapBuffers();
+}
+
+static void keyPressed(unsigned char key, int x, int y)
+{
+	teclas[tecla] = key;
+	tecla++;
+	if (key == 'R')
+	{
+		moviendoCam = false;
+		paramCam = 0;
+		poniendoFoc = 0;
+		paramFoc = 0;
+		for (int i = 0; i < tecla; i++)
+			teclas[i] = 0;
+		tecla = 0;
+	}
+	if (key == 'C') //movemos la camara del usuario
+	{
+		for (int i = 0; i < tecla; i++)
+			teclas[i] = 0;
+		tecla = 0;
+		moviendoCam = true;
+	}
+	if (key == 'F') //Ponemos un tercer foco
+	{
+		for (int i = 0; i < tecla; i++)
+			teclas[i] = 0;
+		tecla = 0;
+		poniendoFoc = true;
+	}
+	if (moviendoCam && key == 13)
+	{
+		const char* dato = (char*)teclas;
+		auxCamUser[paramCam] = atof(dato);
+		paramCam++;
+		if (paramCam == 6)
+		{
+			paramCam = 0;
+			moviendoCam = false;
+			for (int i = 0; i < 6; i++)
+				camUser[i] = auxCamUser[i];
+			printf_s("Camara del usuario movida.\n");
+		}
+		for (int i = 0; i < tecla; i++)
+			teclas[i] = 0;
+		tecla = 0;
+	}
+	if (poniendoFoc && key == 13)
+	{
+		const char* dato = (char*)teclas;
+		if (paramFoc < 3)
+		{
+			userColor[paramFoc] = atof(dato);
+			paramFoc++;
+		}
+		else if(paramFoc < 6)
+		{
+			userPos[paramFoc - 3] = atof(dato);
+			paramFoc++;
+		}
+		if(paramFoc == 6)
+		{
+			userColor[3] = 1;
+			userPos[3] = 1;
+			paramFoc = 0;
+			poniendoFoc = false;
+			glLightfv(GL_LIGHT2, GL_AMBIENT, userColor);
+			glLightfv(GL_LIGHT2, GL_DIFFUSE, userColor);
+			glLightfv(GL_LIGHT2, GL_SPECULAR, userColor);
+			glLightfv(GL_LIGHT2, GL_POSITION, userPos);
+			glEnable(GL_LIGHT2);
+			printf_s("Tercer foco modificado. \n");
+		}
+		for (int i = 0; i < tecla; i++)
+			teclas[i] = 0;
+		tecla = 0;
+	}
 }
 
 void reshapeFcn(GLint newWidth, GLint newHeight)
@@ -384,6 +558,7 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(pinta);
 	glutIdleFunc(pinta);
 	glutReshapeFunc(reshapeFcn);
+	glutKeyboardFunc(keyPressed);
 	glutMainLoop();
 	return 0;
 }
