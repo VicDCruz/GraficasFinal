@@ -27,6 +27,7 @@ const float DIFFUSE[] = { 1, 1, 1, 1 };
 const float SPECULAR[] = { 1, 1, 1, 1 };
 // const float POSITION[] = { 1, 1, 0.3, 0 };
 const float POSITION[] = { 500, 500, 500, 0 };
+const float POSITION1[] = { -500, 500, 500, 0 };
 
 // INIT LUCES
 float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
@@ -46,6 +47,11 @@ void init(void) {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, DIFFUSE);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, SPECULAR);
 	glLightfv(GL_LIGHT0, GL_POSITION, POSITION);
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, AMBIENT);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, DIFFUSE);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, SPECULAR);
+	glLightfv(GL_LIGHT1, GL_POSITION, POSITION1);
 	x = 0;
 }
 
@@ -55,15 +61,15 @@ void ponReflex(int type)
 		1 - Difusa
 		2 - Difusa y Especular, Bajo Brillo
 		3 - Difusa y Especular, Alto Brillo
-		4 - Difusa y Emisión
+		4 - Difusa y Emisiï¿½n
 		5 - Ambiente y Disufa
 		6 - Ambiente, Difusa y Especular, Bajo Brillo
 		7 - Ambiente, Difusa y Especular, Alto Brillo
-		8 - Ambiente, Difusa y Emisión
+		8 - Ambiente, Difusa y Emisiï¿½n
 		9 - Color Ambiente y Difusa
 		10 - Color Ambiente, Difusa y Especular, Bajo Brillo
 		11 - Color Ambiente, Difusa y Especular, Alto Brillo
-		12 - Color Ambiente, Difusa y Emisión
+		12 - Color Ambiente, Difusa y Emisiï¿½n
 	*/
 	switch (type)
 	{
@@ -283,6 +289,7 @@ void visorUsuario()
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -298,10 +305,14 @@ void visorUsuario()
 	glColor3f(1, 0, 1);
 	dibujaEsfera(30, 450, -5, 0);
 
-	glColor3f(0, 0, 0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1, 0.5, 0.5, 0.5);
 	dibujaPiramide(40, 60, -5, 450, 0);
+	glDisable(GL_BLEND);
 
-	glColor3f(0, 1, 1);
+	glColor4f(0, 1, 1, 1);
 	dibujaPiramide(40, 60, 450, 450, 0);
 	glPopMatrix();
 
