@@ -3,8 +3,9 @@
 #include <math.h>
 #include <stdio.h>
 
-const int PALETA = 3;
-int WINWIDTH = 1000, WINHEIGHT = 500; // Initial display-window size.
+// === Parámetros iniciales ===
+const int PALETA = 3; // Se usa una paleta RGB para pintar las figuras
+int WINWIDTH = 1000, WINHEIGHT = 500; // Tamaño inicial de la ventana.
 int tecla;
 unsigned char teclas[256];
 double camUser[6];
@@ -13,20 +14,21 @@ int paramCam;
 int paramFoc;
 bool poniendoFoc;
 bool moviendoCam;
-const float LENGTH = 600;
-const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7;
+const float LENGTH = 600; // Variable independiente para crear un volumen
+const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7; // Parametros de
+// un volumen dependientes de LENGTH
 double x;
 // TIPO DE MATERIALES
-const float NO_MAT[] = { 0, 0, 0, 1 };
-const float MAT_AMBIENT[] = { 0.7, 0.7, 0.7, 1 / 2 };
+const float NO_MAT[] = { 0, 0, 0, 1 }; // Sin material
+const float MAT_AMBIENT[] = { 0.7, 0.7, 0.7, 1 / 2 }; // Material del ambiente
 // const float MAT_AMBIENT_COLOR[] = { 0.8, 0.8, 0.2, 1 };
 const float MAT_AMBIENT_COLOR[] = { 1, 1, 1, 1 / 2 };
 // const float MAT_DIFFUSE[] = { 0.1, 0.5, 0.8, 1 };
-const float MAT_DIFFUSE[] = { 1, 1, 1, 1 };
-const float MAT_SPECULAR[] = { 1, 1, 1, 1 };
-const float NO_SHININESS = 0;
-const float LOW_SHININESS = 5;
-const float HIGH_SHININESS = 100;
+const float MAT_DIFFUSE[] = { 1, 1, 1, 1 }; // Material de lo difuso
+const float MAT_SPECULAR[] = { 1, 1, 1, 1 }; // Material de lo especular
+const float NO_SHININESS = 0; // Sin brillo
+const float LOW_SHININESS = 5; // Poco brillo
+const float HIGH_SHININESS = 150; // Mucho brillo
 const float MAT_EMISSION[] = { 0.3, 0.2, 0.2, 0 };
 
 // PROPIEDADES DE LUCES
@@ -34,8 +36,8 @@ const float AMBIENT[] = { 0, 0, 0, 1 };
 const float DIFFUSE[] = { 1, 1, 1, 1 };
 const float SPECULAR[] = { 1, 1, 1, 1 };
 // const float POSITION[] = { 1, 1, 0.3, 0 };
-const float POSITION[] = { 500, 500, 500, 0 };
-const float POSITION1[] = { -500, 500, 500, 0 };
+const float POSITION[] = { 500, 500, 500, 0 }; // Posición de la Luz 1
+const float POSITION1[] = { -500, 500, 500, 0 }; // Posición de la Luz 2
 float userColor[4];
 float userPos[4];
 
@@ -43,6 +45,7 @@ float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
 int model_two_side = 1;
 int viewpoint = 0;
 
+// === Inicializando la proyección y el color de fondo ===
 void init(void) {
 	glClearColor(0, 0.1, 0, 0);
 
@@ -51,6 +54,7 @@ void init(void) {
 	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	// Estableciendo las propiedades de cada luz
 	glLightfv(GL_LIGHT0, GL_AMBIENT, AMBIENT);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, DIFFUSE);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, SPECULAR);
@@ -71,11 +75,13 @@ void init(void) {
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, viewpoint);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
+	// Encendiendo las luces
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 
+	// Iniciando los valores de la posicion de las cámaras
 	camUser[0] = -300;
 	camUser[1] = 0;
 	camUser[2] = 300;
@@ -87,6 +93,7 @@ void init(void) {
 	poniendoFoc = false;
 }
 
+// === Selección de un tipo de reflexión antes de pintar una figura ===
 void ponReflex(int type)
 {
 	/*
@@ -194,6 +201,7 @@ void ponReflex(int type)
 	}
 }
 
+// === Cubo dibujado con una translación dentro del espacio ===
 void dibujaCubo(float largo, float x, float y, float z) {
 	glPushMatrix();
 	glTranslatef(x, y, z);
@@ -201,6 +209,7 @@ void dibujaCubo(float largo, float x, float y, float z) {
 	glPopMatrix();
 }
 
+// === Dibujando paredes que encierran a la pintura ===
 void dibujaParedes(float alpha)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -208,11 +217,10 @@ void dibujaParedes(float alpha)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	ponReflex(5);
 	// dibujaCubo(1000, 250, 250, -100);
-	// glPolygonMode (GL_FRONT_AND_BACK, GL_LINE); // Wire-frame back face.
 	// glColor4f(0.9, 0.5, 0.9, 1);
 
 	int lado = 750;
-	//Bottom Face of the cube - vertex definition
+	// Cara 1
 	glBegin(GL_POLYGON);
 	glColor4f(0.2, 0.2, 0.8, alpha);
 	glVertex3f(-lado, 0, -lado);
@@ -221,7 +229,7 @@ void dibujaParedes(float alpha)
 	glVertex3f(-lado, 0, lado);
 	glEnd();
 
-	//Front Face of the cube - vertex definition
+	// Cara 2
 	glBegin(GL_POLYGON);
 	glColor4f(0.0, 1.0, 0.0, alpha);
 	glVertex3f(-lado, 0, -lado);
@@ -230,7 +238,7 @@ void dibujaParedes(float alpha)
 	glVertex3f(lado, 0, -lado);
 	glEnd();
 
-	//Back Face of the cube - vertex definition
+	// Cara 3
 	glBegin(GL_POLYGON);
 	glColor4f(1.0, 0.0, 0.0, alpha);
 	glVertex3f(lado, 0, -lado);
@@ -239,7 +247,7 @@ void dibujaParedes(float alpha)
 	glVertex3f(lado, 0, lado);
 	glEnd();
 
-	//Right Face of the cube - vertex definition
+	// Cara 4
 	glBegin(GL_POLYGON);
 	glColor4f(1.0, 0.0, 1.0, alpha);
 	glVertex3f(lado, 0, lado);
@@ -248,7 +256,7 @@ void dibujaParedes(float alpha)
 	glVertex3f(-lado, 0, lado);
 	glEnd();
 
-	//Left Face of the cube - vertex definition
+	// Cara 5
 	glBegin(GL_POLYGON);
 	glColor4f(0.7, 0.7, 0.0, alpha);
 	glVertex3f(-lado, 0, lado);
@@ -257,7 +265,7 @@ void dibujaParedes(float alpha)
 	glVertex3f(-lado, 0, -lado);
 	glEnd();
 
-	//Upper Face of the cube - vertex definition
+	// Cara 6
 	glBegin(GL_POLYGON);
 	glColor4f(0.7, 0.7, 0.3, alpha);
 	glVertex3f(-lado, lado, -lado);
@@ -269,6 +277,7 @@ void dibujaParedes(float alpha)
 	glDisable(GL_BLEND);
 }
 
+// === Esfera dibujada con una translación dentro del espacio ===
 void dibujaEsfera(float radio, float x, float y, float z) {
 	int nLong = 10, nLat = 12;
 	glPushMatrix();
@@ -278,6 +287,7 @@ void dibujaEsfera(float radio, float x, float y, float z) {
 	glPopMatrix();
 }
 
+// === Pirámide dibujada con una translación dentro del espacio ===
 void dibujaPiramide(float radioBase, float altura, float x, float y, float z) {
 	int nLong = 8, nLat = 6;
 	glPushMatrix();
@@ -287,38 +297,45 @@ void dibujaPiramide(float radioBase, float altura, float x, float y, float z) {
 	glPopMatrix();
 }
 
+// === Un borde de un piso compuesto de varios cubos, como un mosaico ===
 void dibujaPiso(float largo, int n, float colores[][PALETA], int rows) {
-	static int disqueRandom = 1;
-	int lados = 4, a, b;
-	int randMaterial = disqueRandom%12;//floor(rand() % 12) + 1;
+	static int pseudoRandom = 1; // Permitir cambiar el material por cada uno de los tipos que existen
+	int lados = 4, a, b; // Hay 4 bordes para formar un rectángulo
+	int randMaterial = pseudoRandom % 12;
 	ponReflex(randMaterial);
-	for (int i = 0; i < lados; i++)
+	for (int i = 0; i < lados; i++) // Crear una linea de cubos, 4 veces con diferentes orientaciones
 	{
-		a = i == 1 ? n - 1 : 0;
-		b = i == 2 ? n - 1 : 0;
-		for (int j = 0; j < n; j++)
+		a = i == 1 ? n - 1 : 0; // Ver si es un extremo de b, para maximizar la altura de a
+		b = i == 2 ? n - 1 : 0; // Ver si es un extremo de a, para maximizar la altura de b
+		for (int j = 0; j < n; j++) // n - número de cubos por línea
 		{
-			int r = j % rows;//floor(rand() % rows);
+			int r = j % rows;
 			glColor3f(colores[r][0], colores[r][1], colores[r][2]);
 			dibujaCubo(largo, largo * a, largo * b, 0);
+			// Tipo de incremento, dependiendo del lado
 			a = (i == 0 || i == 2) ? a + 1 : a;
 			b = (i == 1 || i == 3) ? b + 1 : b;
 		}
 	}
-	disqueRandom++;
+	pseudoRandom++;
 }
+
+// === Creando toda la pintura en el espacio con alineaciones sobre Z ===
 void dibujaObra()
 {
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	// Esquina 1
 	glPushMatrix();
 	glColor3f(1, 1, 0);
 	dibujaEsfera(30, -5, -5, 0);
 
+	// Esquina 2
 	glColor3f(1, 0, 1);
 	dibujaEsfera(30, 450, -5, 0);
 
+	// Esquina 3 con transparencia
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -326,15 +343,17 @@ void dibujaObra()
 	dibujaPiramide(40, 60, -5, 450, 0);
 	glDisable(GL_BLEND);
 
+	// Esquina 4
 	glColor4f(0, 1, 1, 1);
 	dibujaPiramide(40, 60, 450, 450, 0);
 	glPopMatrix();
 
+	// Hay 15 niveles
 	int largo = 15, pisos = 15, h = 0;
-	float cte = largo / pisos;
-	int n = pisos * 2;
+	float cte = largo / pisos; // Decremento del largo de los cubos por piso, para quitar simetria
+	int n = pisos * 2; // Máximo número de cubos por piso
 	for (int i = 0; i < pisos; i++) {
-		float colores[][PALETA] = {
+		float colores[][PALETA] = { // Paleta basada en los colores originales del cuadro
 			{1, 1, 0.2},
 			{1, 0.7, 0.1},
 			{1, 0.4, 0.3},
@@ -347,7 +366,7 @@ void dibujaObra()
 		};
 		int rows = sizeof colores / sizeof colores[0];
 		glPushMatrix();
-		glTranslatef(0.0, 0.0, h);
+		glTranslatef(h, h, h); // Transladamos el piso a la altura h para ir centrando
 		dibujaPiso(largo, n, colores, rows);
 		glPopMatrix();
 		h += largo;
@@ -359,6 +378,7 @@ void dibujaObra()
 	//dibujaParedes(0.5);
 }
 
+// == Función para pintar texto en el espacio ===
 void drawBitmapText(char* string, float x, float y, float z)
 {
 	char* c;
@@ -370,6 +390,7 @@ void drawBitmapText(char* string, float x, float y, float z)
 	}
 }
 
+// === Poniendo texto con las instrucciones del programa ===
 void visorInstrucciones()
 {
 	glDisable(GL_LIGHTING);
@@ -429,6 +450,7 @@ void visorInstrucciones()
 	glEnable(GL_LIGHTING);
 }
 
+// === Inicializando las coordenadas del visor Automático ===
 void visorAutomatico()
 {
 	int same = 300;
@@ -437,12 +459,14 @@ void visorAutomatico()
 	dibujaObra();
 }
 
+// === Inicializando las coordenadas del visor del usuario ===
 void visorUsuario()
 {
 	gluLookAt(camUser[0], camUser[1], camUser[2], camUser[3], camUser[4], camUser[5], 0, 1, 0);
 	dibujaObra();
 }
 
+// === Creación de las 3 vistas ===
 void pinta(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -461,6 +485,7 @@ void pinta(void) {
 	glutSwapBuffers();
 }
 
+// Captura de datos por teclado
 static void keyPressed(unsigned char key, int x, int y)
 {
 	teclas[tecla] = key;
@@ -489,7 +514,7 @@ static void keyPressed(unsigned char key, int x, int y)
 		tecla = 0;
 		poniendoFoc = true;
 	}
-	if (moviendoCam && key == 13)
+	if (moviendoCam && key == 13) // Moviendo la cámara
 	{
 		const char* dato = (char*)teclas;
 		auxCamUser[paramCam] = atof(dato);
@@ -506,7 +531,7 @@ static void keyPressed(unsigned char key, int x, int y)
 			teclas[i] = 0;
 		tecla = 0;
 	}
-	if (poniendoFoc && key == 13)
+	if (poniendoFoc && key == 13) // Poniendo un tercer foco
 	{
 		const char* dato = (char*)teclas;
 		if (paramFoc < 3)
@@ -538,6 +563,7 @@ static void keyPressed(unsigned char key, int x, int y)
 	}
 }
 
+// === Inicializando la visualización del volumen en la ventana de visualización ===
 void reshapeFcn(GLint newWidth, GLint newHeight)
 {
 	WINWIDTH = newWidth;
