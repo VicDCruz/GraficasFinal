@@ -2,10 +2,11 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <stdio.h>
+#include <Windows.h>
 
 // === Parámetros iniciales ===
 const int PALETA = 3; // Se usa una paleta RGB para pintar las figuras
-int WINWIDTH = 1000, WINHEIGHT = 500; // Tamaño inicial de la ventana.
+int WINWIDTH = 1000, WINHEIGHT = 700; // Tamaño inicial de la ventana.
 int tecla;
 unsigned char teclas[256];
 double camUser[6];
@@ -17,7 +18,7 @@ bool moviendoCam;
 const float LENGTH = 600; // Variable independiente para crear un volumen
 const float XWMIN = -LENGTH / 2, XWMAX = LENGTH, YWMIN = -LENGTH / 2, YWMAX = LENGTH, PNEAR = 0, PFAR = LENGTH / 0.7; // Parametros de
 // un volumen dependientes de LENGTH
-double x;
+double x,xy;
 // TIPO DE MATERIALES
 const float NO_MAT[] = { 0, 0, 0, 1 }; // Sin material
 const float MAT_AMBIENT[] = { 0.7, 0.7, 0.7, 1 / 2 }; // Material del ambiente
@@ -41,7 +42,7 @@ const float POSITION1[] = { -500, 500, 500, 0 }; // Posición de la Luz 2
 float userColor[4];
 float userPos[4];
 
-float model_AMBIENT[] = { 0.4, 0.4, 0.4, 1 };
+float model_AMBIENT[] = { 0.2, 0.2, 0.2, 1 };
 int model_two_side = 1;
 int viewpoint = 0;
 
@@ -67,6 +68,7 @@ void init(void) {
 	glLightfv(GL_LIGHT1, GL_POSITION, POSITION1);
 
 	x = 0;
+	xy = 0;
 	tecla = 0;
 	paramCam = 0;
 	paramFoc = 0;
@@ -83,7 +85,7 @@ void init(void) {
 
 	// Iniciando los valores de la posicion de las cámaras
 	camUser[0] = -300;
-	camUser[1] = 0;
+	camUser[1] = 300;
 	camUser[2] = 300;
 	camUser[3] = 0;
 	camUser[4] = 0;
@@ -454,8 +456,9 @@ void visorInstrucciones()
 void visorAutomatico()
 {
 	int same = 300;
-	gluLookAt(same*cos(x), same * sin(x), same, 0.0, 0.0, 0.0, 0.0, 1.0, 0);
+	gluLookAt(same*cos(x), same * sin(xy), same, 0.0, 0.0, 0.0, 0.0, 1.0, 0);
 	x += 0.0005;
+	xy += 0.0003;
 	dibujaObra();
 }
 
@@ -581,7 +584,7 @@ void reshapeFcn(GLint newWidth, GLint newHeight)
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(10, 10);
 	glutInitWindowSize(WINWIDTH, WINHEIGHT);
 	glutCreateWindow("Proyecto Final");
 	init();
